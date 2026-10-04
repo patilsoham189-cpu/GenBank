@@ -51,4 +51,3 @@ Auth-Service/__pycache__/
 .DS_Store
 Thumbs.db
 .env
-push_to_github.bat
