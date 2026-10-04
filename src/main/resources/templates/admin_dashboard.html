@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenBank Core Platform | Operational CBS Terminal</title>
+    <style>
+        :root {
+            --slate-grey: #212529;
+            --steel-blue: #003366;
+            --saffron: #FF9933;
+            --white: #ffffff;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Consolas, sans-serif; }
+        body { background-color: #eef2f5; color: #212529; }
+        .cbs-header { background-color: var(--slate-grey); color: var(--white); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--steel-blue); }
+        .cbs-title { font-weight: 800; font-size: 18px; letter-spacing: 1px; display: flex; align-items: center; gap: 12px; }
+        .status-pulse { width: 10px; height: 10px; background-color: #28a745; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #28a745; }
+        .btn-exit { color: #fff; text-decoration: none; padding: 6px 15px; border: 1px solid #dc3545; background-color: #dc3545; font-size: 13px; font-weight: bold; border-radius: 4px; }
+        .dashboard-layout { max-width: 1350px; margin: 30px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 25px; }
+        .metrics-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .metric-tile { background: var(--white); padding: 20px; border-radius: 6px; border: 1px solid #ced4da; }
+        .metric-title { font-size: 11px; font-weight: bold; color: #6c757d; text-transform: uppercase; }
+        .metric-value { font-size: 24px; font-weight: 700; color: var(--steel-blue); margin-top: 5px; }
+        .panel { background: var(--white); border-radius: 6px; border: 1px solid #ced4da; }
+        .panel-heading { background-color: #f8f9fa; padding: 15px 20px; font-weight: bold; font-size: 14px; border-bottom: 1px solid #ced4da; color: var(--steel-blue); text-transform: uppercase; }
+        .panel-body { padding: 20px; overflow-x: auto; }
+        table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+        table.data th, table.data td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        table.data th { background: #f4f6f9; color: #555; }
+        .tx-cr { color: #28a745; font-weight: bold; }
+        .tx-dr { color: #dc3545; font-weight: bold; }
+        .badge-active { background: #e2f0d9; color: #385723; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; }
+        .badge-frozen { background: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; }
+        .btn-action { padding: 4px 10px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-freeze { background: #dc3545; color: white; }
+        .btn-unfreeze { background: #28a745; color: white; }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
+        .alert-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+    </style>
+</head>
+<body>
+
+<div class="cbs-header">
+    <div class="cbs-title">
+        <span class="status-pulse"></span>
+        GENBANK CENTRAL BANKING SYSTEM (CBS Terminal)
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <span style="font-size:13px; font-weight:bold;">Operator: <span th:text="${admin.username}" style="color:var(--saffron);">ADMIN</span></span>
+        <a th:href="@{/logout}" class="btn-exit">Terminate Session</a>
+    </div>
+</div>
+
+<div class="dashboard-layout">
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+    <div class="metrics-bar">
+        <div class="metric-tile">
+            <div class="metric-title">Retail Customers</div>
+            <div class="metric-value" th:text="${customerCount}">0</div>
+        </div>
+        <div class="metric-tile">
+            <div class="metric-title">Total Customer Balances (INR)</div>
+            <div class="metric-value">₹ <span th:text="${#numbers.formatDecimal(totalDeposits, 1, 'COMMA', 2, 'POINT')}">0.00</span></div>
+        </div>
+        <div class="metric-tile">
+            <div class="metric-title">OTP Microservice</div>
+            <div class="metric-value" style="color: #28a745; font-size: 16px;">ONLINE (Port 8000)</div>
+        </div>
+        <div class="metric-tile">
+            <div class="metric-title">Master Admin Node</div>
+            <div class="metric-value" style="font-size: 16px;" th:text="${admin.email}">admin@genbank.com</div>
+        </div>
+    </div>
+
+    <!-- Customer Master Panel with Live Search and Controls -->
+    <div class="panel">
+        <div class="panel-heading">Retail Customer Master Directory</div>
+        <div class="panel-body">
+            <form th:action="@{/admin/dashboard}" method="get" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Search customers by Name, Account Number, or Email..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #ced4da; border-radius: 4px; font-size: 13px;">
+                <button type="submit" style="padding: 10px 20px; background: var(--steel-blue); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Search Directory</button>
+                <a th:href="@{/admin/dashboard}" style="padding: 10px 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; font-size: 13px; font-weight: bold; display: flex; align-items: center;">Reset</a>
+            </form>
+
+            <table class="data">
+                <thead>
+                <tr>
+                    <th>Account</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Balance (INR)</th>
+                    <th>Status</th>
+                    <th>Administrative Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(customers)}">
+                    <td colspan="7" style="text-align: center; color: #888; padding: 25px;">No customer records matching criteria.</td>
+                </tr>
+                <tr th:each="c : ${customers}">
+                    <td><strong th:text="${c.accountNumber}" style="font-family: monospace; color: var(--steel-blue);">GB000</strong></td>
+                    <td th:text="${c.fullName}">Name</td>
+                    <td th:text="${c.email}">email</td>
+                    <td th:text="${c.phone}">phone</td>
+                    <td><strong>₹ <span th:text="${#numbers.formatDecimal(c.balance, 1, 'COMMA', 2, 'POINT')}">0.00</span></strong></td>
+                    <td>
+                        <span th:if="${c.status.name() == 'ACTIVE'}" class="badge-active">ACTIVE</span>
+                        <span th:if="${c.status.name() == 'FROZEN'}" class="badge-frozen">FROZEN</span>
+                        <span th:if="${c.status.name() == 'BLOCKED'}" class="badge-frozen">BLOCKED</span>
+                    </td>
+                    <td>
+                        <form th:if="${c.status.name() == 'ACTIVE'}" th:action="@{/admin/customer/freeze}" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" th:value="${c.id}"/>
+                            <button type="submit" class="btn-action btn-freeze" onclick="return confirm('Freeze this customer account?')">Freeze Account</button>
+                        </form>
+                        <form th:if="${c.status.name() == 'FROZEN' or c.status.name() == 'BLOCKED'}" th:action="@{/admin/customer/unfreeze}" method="post" style="display:inline;">
+                            <input type="hidden" name="userId" th:value="${c.id}"/>
+                            <button type="submit" class="btn-action btn-unfreeze" onclick="return confirm('Restore this customer account to ACTIVE?')">Unfreeze Account</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Live Bank-Wide Clearing Transactions -->
+    <div class="panel">
+        <div class="panel-heading">Live Core Clearing Audit Log (Recent 50 Entries)</div>
+        <div class="panel-body">
+            <table class="data">
+                <thead>
+                <tr>
+                    <th style="width: 170px;">Timestamp</th>
+                    <th>Reference</th>
+                    <th>Account</th>
+                    <th>Counterparty</th>
+                    <th style="width: 60px;">Type</th>
+                    <th>Amount (INR)</th>
+                    <th>Balance After</th>
+                    <th>Narration</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(transactions)}">
+                    <td colspan="8" style="text-align: center; color: #888; padding: 25px;">No clearing transactions recorded in ledger yet.</td>
+                </tr>
+                <tr th:each="tx : ${transactions}">
+                    <td th:text="${#temporals.format(tx.createdAt, 'dd-MMM-yyyy HH:mm:ss')}" style="color: #666; font-size: 12px;">—</td>
+                    <td><strong th:text="${tx.referenceId}" style="font-family: monospace; font-size: 12px; color: var(--steel-blue);">REF</strong></td>
+                    <td th:text="${tx.accountNumber}" style="font-family: monospace;">GB00</td>
+                    <td>
+                        <span th:text="${tx.counterpartyName}">Counterparty</span>
+                        <small th:if="${tx.counterpartyAccount != null and tx.counterpartyAccount != 'SYSTEM' and tx.counterpartyAccount != 'SELF'}"
+                               th:text="'(' + ${tx.counterpartyAccount} + ')'" style="color:#777;"></small>
+                    </td>
+                    <td>
+                        <span th:if="${tx.type.name() == 'CREDIT'}" class="tx-cr">CR</span>
+                        <span th:if="${tx.type.name() == 'DEBIT'}" class="tx-dr">DR</span>
+                    </td>
+                    <td>
+                        <span th:if="${tx.type.name() == 'CREDIT'}" class="tx-cr">+ ₹ <span th:text="${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                        <span th:if="${tx.type.name() == 'DEBIT'}" class="tx-dr">- ₹ <span th:text="${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}">0.00</span></span>
+                    </td>
+                    <td>₹ <span th:text="${#numbers.formatDecimal(tx.balanceAfter, 1, 'COMMA', 2, 'POINT')}">0.00</span></td>
+                    <td th:text="${tx.narration}" style="color: #555;">—</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

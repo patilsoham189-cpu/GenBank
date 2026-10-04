@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenBank - Corporate & Retail NetBanking</title>
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-blue: #0056b3;
+            --accent-saffron: #FF9933;
+            --success-green: #28a745;
+            --dark-slate: #1c2d42;
+            --light-bg: #f4f7fa;
+            --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: var(--light-bg); color: #333; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Premium Indian Bank Header */
+        header { 
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-slate)); 
+            color: #fff; 
+            padding: 15px 60px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 5px solid var(--accent-saffron);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-badge { background: linear-gradient(45deg, var(--accent-saffron), #fff 60%); color: var(--primary-blue); padding: 10px 18px; font-weight: 800; font-size: 24px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1); }
+        .logo-text h1 { font-size: 24px; font-weight: 700; letter-spacing: 0.5px; }
+        .logo-text p { font-size: 11px; color: #b0c4de; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .security-banner { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #d4edda; font-weight: 500; }
+
+        /* Notification Banners */
+        .alert-wrapper { max-width: 500px; margin: 25px auto 0 auto; width: 100%; padding: 0 20px; }
+        .alert { padding: 15px; border-radius: 6px; font-size: 14px; text-align: center; font-weight: 500; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
+        .alert-success { background-color: #d4edda; color: #155724; border-left: 5px solid var(--success-green); }
+
+        /* Central Auth Container */
+        .auth-container { max-width: 500px; width: 100%; margin: 30px auto; background: #fff; border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid #e1e8ed; overflow: hidden; }
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #e1e8ed; }
+        .tab-btn { flex: 1; padding: 16px; text-align: center; border: none; background: none; font-weight: 600; color: #6c757d; cursor: pointer; transition: all 0.3s ease; font-size: 14px; }
+        .tab-btn:hover { color: var(--primary-blue); background: rgba(0, 51, 102, 0.02); }
+        .tab-btn.active { background: #fff; color: var(--primary-blue); border-top: 4px solid var(--primary-blue); font-weight: 700; }
+        
+        .form-panel { padding: 35px; display: none; }
+        .form-panel.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .panel-heading { margin-bottom: 25px; border-bottom: 2px solid #f4f7fa; padding-bottom: 10px; }
+        .panel-heading h2 { font-size: 18px; color: var(--primary-blue); font-weight: 700; }
+        .panel-heading p { font-size: 12px; color: #777; margin-top: 4px; }
+
+        /* Real Form UX Controls */
+        .form-group { margin-bottom: 22px; position: relative; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: #495057; text-transform: uppercase; letter-spacing: 0.3px; }
+        input { width: 100%; padding: 12px 14px; border: 1.5px solid #ced4da; border-radius: 6px; font-size: 14px; color: #333; transition: all 0.2s ease; background-color: #fafafa; }
+        input:focus { outline: none; border-color: var(--secondary-blue); background-color: #fff; box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.15); }
+        
+        /* Custom Buttons styled like Premium Netbanking */
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue)); color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 15px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,51,102,0.15); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,51,102,0.2); }
+        .btn-otp { background: linear-gradient(135deg, #FF9933, #e08528); color: #fff; font-size: 13px; padding: 10px; margin-bottom: 5px; box-shadow: none; }
+        .btn-admin { background: linear-gradient(135deg, #212529, #343a40); }
+
+        footer { text-align: center; font-size: 12px; color: #6c757d; margin-top: auto; padding: 25px 0; background: #fff; border-top: 1px solid #e1e8ed; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo-container">
+        <div class="logo-badge">GB</div>
+        <div class="logo-text">
+            <h1>GenBank</h1>
+            <p>Apna Bank - Committed Towards Excellence</p>
+        </div>
+    </div>
+    <div class="security-banner">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2 2 0 0 1 2 2v2H6V3a2 2 0 0 1 2-2zm3 4V3a3 3 0 0 0-6 0v2H2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-3z"/></svg>
+        <span>256-Bit SSL Secured Session</span>
+    </div>
+</header>
+
+<div class="alert-wrapper">
+    <div th:if="${param.logout}" class="alert alert-success">You have been logged out securely.</div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+</div>
+
+<div class="auth-container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchForm(event, 'user-login')">Retail Login</button>
+        <button class="tab-btn" onclick="switchForm(event, 'admin-login')">Corporate/Admin</button>
+        <button class="tab-btn" onclick="switchForm(event, 'signup')">Open Account</button>
+    </div>
+
+    <!-- Retail Customer Login -->
+    <div id="user-login" class="form-panel active">
+        <div class="panel-heading">
+            <h2>Personal NetBanking Login</h2>
+            <p>Please enter your registered credentials to securely access your savings account.</p>
+        </div>
+        <form th:action="@{/user/login}" method="POST">
+            <div class="form-group">
+                <label>Registered Email Address</label>
+                <input type="email" name="email" required placeholder="example@genbank.com">
+            </div>
+            <div class="form-group">
+                <label>NetBanking Password</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn">Secure Sign In</button>
+        </form>
+    </div>
+
+    <!-- Administrative Core Login -->
+    <div id="admin-login" class="form-panel">
+        <div class="panel-heading">
+            <h2>Core Banking System (CBS) Authentication</h2>
+            <p>Authorized personnel login monitoring active. Enter master administrative credentials.</p>
+        </div>
+        <form th:action="@{/admin/login}" method="POST">
+            <div class="form-group">
+                <label>Administrator Official Email</label>
+                <input type="email" name="email" required placeholder="officer.cbs@genbank.com">
+            </div>
+            <div class="form-group">
+                <label>Master Security Password</label>
+                <input type="password" name="password" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="btn btn-admin">Authenticate & Boot CBS</button>
+        </form>
+    </div>
+
+    <!-- Instant Savings Account Registration -->
+    <div id="signup" class="form-panel">
+        <div class="panel-heading">
+            <h2>Digital Savings Account Application</h2>
+            <p>Complete multi-factor validation via integrated email confirmation service to generate your Account Number.</p>
+        </div>
+        <form th:action="@{/signup}" method="POST">
+            <div class="form-group">
+                <label>Applicant Full Name (As per KYC Records)</label>
+                <input type="text" name="fullName" required placeholder="Enter full legal name">
+            </div>
+            <div class="form-group">
+                <label>Personal Email Address</label>
+                <input type="email" id="signup-email" name="email" required placeholder="name@domain.com">
+            </div>
+            <div class="form-group">
+                <label>Mobile Number (+91)</label>
+                <input type="tel" name="phone" required placeholder="9876543210" pattern="[6-9][0-9]{9}">
+            </div>
+            <div class="form-group">
+                <label>Branch IFSC Code</label>
+                <input type="text" name="ifscCode" required placeholder="GBIN0GENBNK" value="GBIN0GENBNK" readonly style="background-color: #f1f3f5; cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+                <label>Set Secure Login Password</label>
+                <input type="password" name="password" required minlength="8" placeholder="At least 8 characters">
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px dashed #ced4da; margin-bottom: 20px;">
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label>E-KYC Dispatch Verification</label>
+                    <button type="button" class="btn btn-otp" onclick="triggerOtpPipeline(event)">Send 6-Digit Verification Code</button>
+                </div>
+                <div id="otp-info-banner" style="display: none; background: #e8f4fd; border: 1px solid #b8daff; border-radius: 4px; padding: 10px; margin-bottom: 12px; font-size: 13px; color: #004085;">
+                    <span style="font-weight: bold;">OTP Dispatched!</span> Check your running server terminal console to view the 6-digit code.
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Enter Verification OTP Code</label>
+                    <input type="text" id="signup-otp" name="otp" required placeholder="------" style="letter-spacing: 5px; text-align: center; font-weight: bold; font-size: 18px;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="background: linear-gradient(135deg, var(--success-green), #218838);">Verify & Open Account</button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    &copy; 2026 GenBank Ltd. (Apna Bank). Whole-owned Indian Scheduled Commercial Banking Initiative.<br>
+    Regulated by the Reserve Bank of India (RBI). All deposits are insured up to ₹5 Lakhs under DICGC.
+</footer>
+
+<script>
+    function switchForm(evt, panelId) {
+        let formPanels = document.getElementsByClassName("form-panel");
+        for (let i = 0; i < formPanels.length; i++) {
+            formPanels[i].classList.remove("active");
+        }
+        let tabButtons = document.getElementsByClassName("tab-btn");
+        for (let i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+        document.getElementById(panelId).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    function triggerOtpPipeline(evt) {
+        const targetEmail = document.getElementById("signup-email").value;
+        if(!targetEmail || !targetEmail.includes('@')) {
+            alert("Error: Please enter a valid email address first to receive your verification code.");
+            return;
+        }
+        const btn = evt ? evt.target : document.querySelector(".btn-otp");
+        const origText = btn ? btn.innerText : "";
+        if (btn) {
+            btn.innerText = "Dispatching OTP...";
+            btn.disabled = true;
+        }
+
+        fetch('/send-otp?email=' + encodeURIComponent(targetEmail), { method: 'POST' })
+        .then(async res => {
+            if (btn) {
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
+            const data = await res.json().catch(() => ({}));
+            if(res.ok) {
+                const banner = document.getElementById("otp-info-banner");
+                if (banner) {
+                    banner.style.display = "block";
+                }
+                alert("Verification OTP Dispatched!\n\nPlease check your running server terminal console to view the 6-digit OTP code.");
+            } else {
+                alert(data.message || "Failed to dispatch OTP. Please verify your details.");
+            }
+        })
+        .catch(() => {
+            if (btn) {
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
+            alert("Connection error: Unable to communicate with the GenBank core service. Please ensure the Python OTP service is running on port 8000.");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        /*[# th:if="${activeTab}"]*/
+        const activeTab = "/*[[${activeTab}]]*/";
+        if (activeTab === "admin-login") {
+            const tabs = document.querySelectorAll(".tab-btn");
+            if (tabs.length > 1) tabs[1].click();
+        } else if (activeTab === "signup") {
+            const tabs = document.querySelectorAll(".tab-btn");
+            if (tabs.length > 2) tabs[2].click();
+        }
+        /*[/]*/
+    });
+</script>
+</body>
+</html>
