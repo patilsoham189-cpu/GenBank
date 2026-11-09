@@ -177,12 +177,12 @@ Double-click [`run.bat`](run.bat) or run from your terminal:
 - **Email:** `admin@genbank.com`
 - **Password:** `Admin@123`
 
-### 2. Retail Customer Accounts
+### 2. Retail Customer Accounts (Demo)
 | Account Holder | Account Number | Registered Email | Balance | Password |
 | :--- | :--- | :--- | :--- | :--- |
-| **Soham Rajkumar Patil** | `GB1893228017` | `patilsoham189@gmail.com` | ₹2,000.00 | User password |
-| **Chaudappa Sidaramappa Sindagi** | `GB1269557905` | `sindagi99official@gmail.com` | ₹500.00 | User password |
-| **Atharv Umesh Bhange** | `GB1235036932` | `bhangeatharv@gmail.com` | ₹1,000.00 | User password |
+| **Aarav Sharma** | `GB1893228017` | `aarav.sharma@example.com` | ₹2,000.00 | User password |
+| **Priya Patel** | `GB1269557905` | `priya.patel@example.com` | ₹500.00 | User password |
+| **Rohan Gupta** | `GB1235036932` | `rohan.gupta@example.com` | ₹1,000.00 | User password |
 
 *To test onboarding, open the "Register Account" tab, enter applicant details, click "Send 6-Digit Verification Code", check the server terminal for the dispatched OTP, and complete registration.*
 

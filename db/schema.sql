@@ -68,9 +68,9 @@ ON DUPLICATE KEY UPDATE email = VALUES(email);
 -- Demo Retail Customers
 INSERT INTO users (id, account_number, ifsc_code, full_name, email, phone, password, balance, status, version)
 VALUES 
-(1, 'GB1893228017', 'GBIN0GENBNK', 'Soham Rajkumar Patil', 'patilsoham189@gmail.com', '7823060566', '$2a$10$tmOeyVpndTzfjemFF5cbhu45zK/wmOJANxuNY41e2rkmB.yOKRHSq', 2000.00, 'ACTIVE', 1),
-(2, 'GB1269557905', 'GBIN0GENBNK', 'Chaudappa Sidaramappa Sindagi', 'sindagi99official@gmail.com', '9552748061', '$2a$10$y3oJlK2e6IdzTu/TJHDZH.VU6OdaYmPinBevkhSBWUpmiAqYRvgce', 500.00, 'ACTIVE', 2),
-(3, 'GB1235036932', 'GBIN0GENBNK', 'Atharv Umesh Bhange', 'bhangeatharv@gmail.com', '8668750371', '$2a$10$9R49zAM4I3jBAdw79FZYteOynj1OYghM5l/Cyihfbel4d4VtCkre.', 1000.00, 'ACTIVE', 0)
+(1, 'GB1893228017', 'GBIN0GENBNK', 'Aarav Sharma', 'aarav.sharma@example.com', '9876543210', '$2a$10$tmOeyVpndTzfjemFF5cbhu45zK/wmOJANxuNY41e2rkmB.yOKRHSq', 2000.00, 'ACTIVE', 1),
+(2, 'GB1269557905', 'GBIN0GENBNK', 'Priya Patel', 'priya.patel@example.com', '9876543211', '$2a$10$y3oJlK2e6IdzTu/TJHDZH.VU6OdaYmPinBevkhSBWUpmiAqYRvgce', 500.00, 'ACTIVE', 2),
+(3, 'GB1235036932', 'GBIN0GENBNK', 'Rohan Gupta', 'rohan.gupta@example.com', '9876543212', '$2a$10$9R49zAM4I3jBAdw79FZYteOynj1OYghM5l/Cyihfbel4d4VtCkre.', 1000.00, 'ACTIVE', 0)
 ON DUPLICATE KEY UPDATE full_name = VALUES(full_name);
 
 -- Seed Double-Entry Ledger Transactions
@@ -78,10 +78,10 @@ INSERT INTO transactions (id, user_id, reference_id, account_number, counterpart
 VALUES
 (1, 1, 'REW202609231550141001', 'GB1893228017', 'GenBank Digital Onboarding', 'CREDIT', 1000.00, 1000.00, 'Initial Digital Account Activation Reward', '2026-09-23 15:50:14.000000'),
 (2, 2, 'REW202609261108341002', 'GB1269557905', 'GenBank Digital Onboarding', 'CREDIT', 1000.00, 1000.00, 'Initial Digital Account Activation Reward', '2026-09-26 11:08:34.000000'),
-(3, 2, 'TXN202609261115004321', 'GB1269557905', 'Soham Rajkumar Patil', 'DEBIT', 500.00, 500.00, 'Fund Transfer to Soham Rajkumar Patil (GB1893228017)', '2026-09-26 11:15:00.000000'),
-(4, 1, 'TXN202609261115004321', 'GB1893228017', 'Chaudappa Sidaramappa Sindagi', 'CREDIT', 500.00, 1500.00, 'Fund Transfer from Chaudappa Sidaramappa Sindagi (GB1269557905)', '2026-09-26 11:15:00.000000'),
-(5, 2, 'DEP202610021200057860', 'GB1269557905', 'Chaudappa Sidaramappa Sindagi', 'CREDIT', 500.00, 1000.00, 'Account Balance Adjustment', '2026-10-02 12:00:05.849706'),
-(6, 2, 'TXN202610021209197615', 'GB1269557905', 'Soham Rajkumar Patil', 'DEBIT', 500.00, 500.00, 'Fund Transfer to Soham Rajkumar Patil (GB1893228017)', '2026-10-02 12:09:19.378664'),
-(7, 1, 'TXN202610021209197615', 'GB1893228017', 'Chaudappa Sidaramappa Sindagi', 'CREDIT', 500.00, 2000.00, 'Fund Transfer from Chaudappa Sidaramappa Sindagi (GB1269557905)', '2026-10-02 12:09:19.383146'),
+(3, 2, 'TXN202609261115004321', 'GB1269557905', 'Aarav Sharma', 'DEBIT', 500.00, 500.00, 'Fund Transfer to Aarav Sharma (GB1893228017)', '2026-09-26 11:15:00.000000'),
+(4, 1, 'TXN202609261115004321', 'GB1893228017', 'Priya Patel', 'CREDIT', 500.00, 1500.00, 'Fund Transfer from Priya Patel (GB1269557905)', '2026-09-26 11:15:00.000000'),
+(5, 2, 'DEP202610021200057860', 'GB1269557905', 'Priya Patel', 'CREDIT', 500.00, 1000.00, 'Account Balance Adjustment', '2026-10-02 12:00:05.849706'),
+(6, 2, 'TXN202610021209197615', 'GB1269557905', 'Aarav Sharma', 'DEBIT', 500.00, 500.00, 'Fund Transfer to Aarav Sharma (GB1893228017)', '2026-10-02 12:09:19.378664'),
+(7, 1, 'TXN202610021209197615', 'GB1893228017', 'Priya Patel', 'CREDIT', 500.00, 2000.00, 'Fund Transfer from Priya Patel (GB1269557905)', '2026-10-02 12:09:19.383146'),
 (8, 3, 'REW202610021218165415', 'GB1235036932', 'GenBank Digital Onboarding', 'CREDIT', 1000.00, 1000.00, 'Initial Digital Account Activation Reward', '2026-10-02 12:18:16.914917')
 ON DUPLICATE KEY UPDATE reference_id = VALUES(reference_id);
