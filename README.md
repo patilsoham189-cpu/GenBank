@@ -149,14 +149,26 @@ cd ..
 
 ### 3. Launching the Platform
 
-#### Option A: One-Click Launcher (Windows)
-Double-click [`run.bat`](run.bat) or run from your terminal:
+#### Option A: Docker Compose (Universal 1-Click Launch)
+Ensure Docker is running, then boot the entire system (MySQL 8.4 + FastAPI Microservice + Spring Boot):
+```bash
+docker compose up --build
+```
+*The platform automatically spins up the database, mounts seed records, launches the authentication microservice, and starts the core banking platform on `http://localhost:8080/`.*
+
+#### Option B: One-Click Windows Launcher
+Double-click [`run.bat`](run.bat) or run from PowerShell:
 ```cmd
 .\run.bat
 ```
-*The launcher checks MySQL, starts the FastAPI microservice on port 8000, boots Spring Boot on port 8080, and automatically opens your browser to `http://localhost:8080/`.*
 
-#### Option B: Manual Startup
+#### Option C: Linux / macOS Launcher
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+#### Option D: Manual Startup
 1. **Start the Python OTP Microservice:**
    ```bash
    cd Auth-Service

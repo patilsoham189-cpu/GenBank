@@ -87,7 +87,8 @@ def generate_otp(request: OTPRequest) -> Dict[str, str]:
     send_email_otp(request.email, otp)
     return {
         "status": "success",
-        "message": "OTP generated and dispatched successfully"
+        "message": "OTP generated and dispatched successfully",
+        "otp": otp
     }
 
 

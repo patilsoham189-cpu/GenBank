@@ -40,9 +40,10 @@ public class BankController {
     public ResponseEntity<Map<String, String>> handleOtpRequest(@RequestParam String email) {
         Map<String, String> response = new HashMap<>();
         try {
-            bankingService.sendOtp(email);
+            String otp = bankingService.sendOtp(email);
             response.put("status", "success");
-            response.put("message", "Verification code dispatched! Please check your server terminal console to view the 6-digit OTP code.");
+            response.put("message", "Verification code dispatched! For demonstration, your OTP is: " + otp);
+            response.put("otp", otp);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
             response.put("status", "error");

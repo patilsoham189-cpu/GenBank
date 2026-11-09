@@ -230,8 +230,18 @@
                 const banner = document.getElementById("otp-info-banner");
                 if (banner) {
                     banner.style.display = "block";
+                    if (data.otp) {
+                        banner.innerHTML = `<span style="font-weight: bold; color: #155724;">✅ Verification Code Dispatched!</span> Demo OTP: <strong style="font-size: 15px; letter-spacing: 3px; color: #004085; background: #fff; padding: 2px 8px; border-radius: 4px; border: 1px solid #b8daff;">${data.otp}</strong> <span style="font-size: 11px; opacity: 0.85;">(Auto-filled below & valid 5 mins)</span>`;
+                        banner.style.background = "#d4edda";
+                        banner.style.borderColor = "#c3e6cb";
+                        banner.style.color = "#155724";
+                    }
                 }
-                alert("Verification OTP Dispatched!\n\nPlease check your running server terminal console to view the 6-digit OTP code.");
+                const otpInput = document.querySelector("input[name='otp']");
+                if (otpInput && data.otp) {
+                    otpInput.value = data.otp;
+                }
+                alert(data.message || "Verification OTP Dispatched!");
             } else {
                 alert(data.message || "Failed to dispatch OTP. Please verify your details.");
             }
