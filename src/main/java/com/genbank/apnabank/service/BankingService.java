@@ -209,6 +209,13 @@ public class BankingService {
      * Returns the generated 6-digit OTP string.
      */
     public String sendOtp(String email) {
+        return (String) sendOtpDetailed(email).get("otp");
+    }
+
+    /**
+     * Dispatches an OTP and returns detailed delivery metadata (e.g. whether live SMTP email was sent).
+     */
+    public Map<String, Object> sendOtpDetailed(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("This email address is already registered. Please sign in instead.");
         }
@@ -216,11 +223,19 @@ public class BankingService {
             Map<String, String> request = new HashMap<>();
             request.put("email", email);
             Map<?, ?> response = restTemplate.postForObject(otpServiceUrl + "/generate", request, Map.class);
+            Map<String, Object> result = new HashMap<>();
             String otp = (response != null && response.get("otp") != null) ? response.get("otp").toString() : "";
+            boolean emailSent = (response != null && Boolean.TRUE.equals(response.get("email_sent")));
+            String message = (response != null && response.get("message") != null) ? response.get("message").toString() : "OTP generated";
+
             System.out.println("\n==================================================");
-            System.out.println(" [GENBANK AUTH PIPELINE] OTP for " + email + ": " + otp);
+            System.out.println(" [GENBANK AUTH PIPELINE] OTP for " + email + ": " + otp + " (Live Email Dispatched: " + emailSent + ")");
             System.out.println("==================================================\n");
-            return otp;
+
+            result.put("otp", otp);
+            result.put("emailSent", emailSent);
+            result.put("message", message);
+            return result;
         } catch (RestClientException e) {
             throw new IllegalStateException("OTP microservice is unreachable. Please ensure the Python service is running on port 8000.", e);
         } catch (Exception e) {

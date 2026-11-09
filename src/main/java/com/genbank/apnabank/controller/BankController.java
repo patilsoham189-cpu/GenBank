@@ -37,13 +37,20 @@ public class BankController {
      */
     @PostMapping("/send-otp")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> handleOtpRequest(@RequestParam String email) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleOtpRequest(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            String otp = bankingService.sendOtp(email);
+            Map<String, Object> otpResult = bankingService.sendOtpDetailed(email);
+            boolean emailSent = Boolean.TRUE.equals(otpResult.get("emailSent"));
+            String otp = (String) otpResult.get("otp");
             response.put("status", "success");
-            response.put("message", "Verification code dispatched! For demonstration, your OTP is: " + otp);
-            response.put("otp", otp);
+            response.put("emailSent", emailSent);
+            if (emailSent) {
+                response.put("message", "Verification code sent to " + email + "! Please check your email inbox.");
+            } else {
+                response.put("message", "Verification code dispatched! For demonstration, your OTP is: " + otp);
+                response.put("otp", otp);
+            }
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException | IllegalStateException e) {
             response.put("status", "error");
