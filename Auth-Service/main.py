@@ -15,6 +15,28 @@ MAX_ATTEMPTS = 3
 RATE_LIMIT_SECONDS = 600
 MAX_GENERATE_REQUESTS = 3
 
+# Load .env file automatically if present
+def _load_env_file():
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "..", ".env"),
+        os.path.join(os.path.dirname(__file__), ".env"),
+        ".env"
+    ]
+    for path in candidates:
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip('"').strip("'")
+                        if k and not os.getenv(k):
+                            os.environ[k] = v
+            break
+
+_load_env_file()
+
 # SMTP Configuration (Optional - falls back gracefully to demo mode if not set)
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
