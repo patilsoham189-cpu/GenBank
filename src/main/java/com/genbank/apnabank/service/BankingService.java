@@ -140,8 +140,11 @@ public class BankingService {
 
         Optional<Admin> adminOpt = adminRepository.findByEmailIgnoreCase(cleanEmail);
         if (adminOpt.isEmpty()) {
+            adminOpt = adminRepository.findByUsernameIgnoreCase(cleanEmail);
+        }
+        if (adminOpt.isEmpty()) {
             adminOpt = adminRepository.findAll().stream()
-                    .filter(a -> cleanEmail.equalsIgnoreCase(a.getEmail()))
+                    .filter(a -> cleanEmail.equalsIgnoreCase(a.getEmail()) || cleanEmail.equalsIgnoreCase(a.getUsername()))
                     .findFirst();
         }
 

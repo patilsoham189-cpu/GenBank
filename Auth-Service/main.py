@@ -2,6 +2,7 @@ import os
 import time
 import secrets
 import smtplib
+import threading
 from email.message import EmailMessage
 from typing import Dict, Any, List
 
@@ -43,6 +44,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "GenBank Security")
+SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "security@genbank.com")
 
 # In-memory stores
 otp_store: Dict[str, Dict[str, Any]] = {}
@@ -80,7 +82,8 @@ def send_email_otp(email: str, otp: str) -> bool:
         try:
             msg = EmailMessage()
             msg["Subject"] = f"Your GenBank Verification Code: {otp}"
-            msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_USER}>"
+            msg["From"] = f"{SMTP_FROM_NAME} <{SMTP_FROM_EMAIL}>"
+            msg["Reply-To"] = "no-reply@genbank.com"
             msg["To"] = email
 
             # Plain text fallback
@@ -171,11 +174,14 @@ def generate_otp(request: OTPRequest) -> Dict[str, Any]:
         "attempts": 0
     }
     
-    email_sent = send_email_otp(request.email, otp)
-
+    email_sent = bool(SMTP_USER and SMTP_PASSWORD)
     if email_sent:
+        # Asynchronously dispatch email in background thread so the HTTP response returns in < 50ms
+        threading.Thread(target=send_email_otp, args=(request.email, otp), daemon=True).start()
         message = f"Verification code dispatched to {request.email}! Please check your inbox."
     else:
+        # Graceful console fallback for demo environments
+        send_email_otp(request.email, otp)
         message = f"Verification code dispatched! For demonstration, your OTP is: {otp}"
 
     return {

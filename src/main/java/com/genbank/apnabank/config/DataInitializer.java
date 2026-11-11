@@ -35,28 +35,27 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Upgrade any legacy plain text admin passwords to BCrypt
-        adminRepository.findAll().forEach(admin -> {
-            if (admin.getPassword() != null && !admin.getPassword().startsWith("$2")) {
-                admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-                adminRepository.save(admin);
-            }
-        });
-
-        // Ensure primary admin account exists
-        Optional<Admin> admin1Opt = adminRepository.findByUsernameIgnoreCase("admin1");
-        Optional<Admin> adminOpt = adminRepository.findByUsernameIgnoreCase("admin");
-        if (adminOpt.isEmpty() && admin1Opt.isPresent()) {
-            Admin a1 = admin1Opt.get();
-            a1.setUsername("admin");
-            adminRepository.save(a1);
-        } else if (adminOpt.isEmpty()) {
+        // Enforce strictly ONE master administrator account
+        List<Admin> allAdmins = adminRepository.findAll();
+        if (allAdmins.isEmpty()) {
             Admin admin = new Admin();
             admin.setUsername("admin");
             admin.setEmail("admin@genbank.com");
             admin.setPassword(passwordEncoder.encode("Admin@123"));
             adminRepository.save(admin);
-            System.out.println("[DataInitializer] Initialized administrator account.");
+            System.out.println("[DataInitializer] Initialized single master administrator account.");
+        } else {
+            Admin primary = allAdmins.get(0);
+            primary.setUsername("admin");
+            primary.setEmail("admin@genbank.com");
+            if (primary.getPassword() == null || !primary.getPassword().startsWith("$2")) {
+                primary.setPassword(passwordEncoder.encode("Admin@123"));
+            }
+            adminRepository.save(primary);
+            // Purge any extraneous admin records so there is strictly one admin
+            for (int i = 1; i < allAdmins.size(); i++) {
+                adminRepository.delete(allAdmins.get(i));
+            }
         }
 
         // Clean up & standardize user records
