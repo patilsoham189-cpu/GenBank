@@ -28,15 +28,25 @@ if %ERRORLEVEL% NEQ 0 (
     echo       MySQL is already ONLINE on port 3306.
 )
 
+:: Detect active Python runtime
+set "PY_CMD=python"
+if exist "%LOCALAPPDATA%\Python\bin\python.exe" set "PY_CMD=%LOCALAPPDATA%\Python\bin\python.exe"
+if exist "%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe" set "PY_CMD=%LOCALAPPDATA%\Python\pythoncore-3.14-64\python.exe"
+
 :: 2. Check if FastAPI OTP service is running on port 8000
 echo.
 echo [2/3] Checking FastAPI OTP Microservice on port 8000...
 powershell -NoProfile -Command "$c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 8000); exit 0 } catch { exit 1 } finally { $c.Dispose() }" >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo       Starting Python OTP Microservice...
-    start "GenBank OTP Microservice (Port 8000)" cmd /k "cd /d "%~dp0Auth-Service" && python main.py"
-    powershell -NoProfile -Command "for ($i=0; $i -lt 10; $i++) { $c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 8000); exit 0 } catch { Start-Sleep -Seconds 1 } finally { $c.Dispose() } }; exit 1" >nul 2>&1
-    echo       FastAPI Microservice is now ONLINE on port 8000.
+    start "GenBank OTP Microservice (Port 8000)" cmd /k "cd /d "%~dp0Auth-Service" && "%PY_CMD%" -m uvicorn main:app --host 127.0.0.1 --port 8000"
+    echo       Waiting for OTP Microservice to initialize...
+    powershell -NoProfile -Command "for ($i=0; $i -lt 15; $i++) { $c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 8000); exit 0 } catch { Start-Sleep -Seconds 1 } finally { $c.Dispose() } }; exit 1" >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        echo       FastAPI Microservice is now ONLINE on port 8000.
+    ) else (
+        echo       WARNING: FastAPI Microservice could not be reached on port 8000.
+    )
 ) else (
     echo       FastAPI Microservice is already ONLINE on port 8000.
 )
