@@ -4,6 +4,11 @@
 # ======================================================================
 set -e
 
+# Load .env if present
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 echo "=========================================================="
 echo " Starting GenBank Digital Core Banking Platform"
 echo "=========================================================="

@@ -7,6 +7,14 @@ echo                     GENBANK ALL-IN-ONE LAUNCHER
 echo ======================================================================
 echo.
 
+:: 0. Load local environment configurations from .env if present
+if exist ".env" (
+    echo [0/3] Loading local environment configurations from .env...
+    for /f "usebackq eol=# tokens=1* delims==" %%i in (".env") do (
+        if not "%%i"=="" set "%%i=%%j"
+    )
+)
+
 :: 1. Check if MySQL is running on port 3306
 echo [1/3] Checking MySQL Database on port 3306...
 powershell -NoProfile -Command "$c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 3306); exit 0 } catch { exit 1 } finally { $c.Dispose() }" >nul 2>&1
@@ -48,9 +56,12 @@ echo Launching default web browser in background once server is live...
 start "" cmd /c "ping 127.0.0.1 -n 4 >nul & start http://localhost:8080/"
 
 :: Run Spring Boot (fast-boot with JAR if compiled, or via Maven wrapper)
+set JVM_OPTS=
+if defined DB_PASSWORD set JVM_OPTS=-DDB_PASSWORD="%DB_PASSWORD%" -Dspring.datasource.password="%DB_PASSWORD%"
+
 if exist "target\GenBank-1.0.jar" (
     echo Launching optimized binary: target\GenBank-1.0.jar
-    java -jar target\GenBank-1.0.jar
+    java %JVM_OPTS% -jar target\GenBank-1.0.jar
 ) else (
     echo Launching via Maven Wrapper...
     call mvnw.cmd spring-boot:run
