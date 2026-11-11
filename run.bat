@@ -9,11 +9,13 @@ echo.
 
 :: 1. Check if MySQL is running on port 3306
 echo [1/3] Checking MySQL Database on port 3306...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$t = Test-NetConnection -ComputerName 127.0.0.1 -Port 3306 -InformationLevel Quiet; if (-not $t) { exit 1 }" >nul 2>&1
+powershell -NoProfile -Command "$c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 3306); exit 0 } catch { exit 1 } finally { $c.Dispose() }" >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo       MySQL is stopped. Starting MySQL Server daemon...
     start "GenBank MySQL Server" /min "D:\Download\mysql-enterprise-9.7.1_winx64_bundle\mysql-commercial-9.7.1-winx64\mysql-commercial-9.7.1-winx64\bin\mysqld.exe" --defaults-file="D:\Download\mysql-enterprise-9.7.1_winx64_bundle\mysql-commercial-9.7.1-winx64\mysql-commercial-9.7.1-winx64\my.ini" --console
-    ping 127.0.0.1 -n 4 >nul
+    echo       Waiting for MySQL to finish initializing...
+    powershell -NoProfile -Command "for ($i=0; $i -lt 15; $i++) { $c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 3306); exit 0 } catch { Start-Sleep -Seconds 1 } finally { $c.Dispose() } }; exit 1" >nul 2>&1
+    echo       MySQL is now ONLINE on port 3306.
 ) else (
     echo       MySQL is already ONLINE on port 3306.
 )
@@ -21,11 +23,12 @@ if %ERRORLEVEL% NEQ 0 (
 :: 2. Check if FastAPI OTP service is running on port 8000
 echo.
 echo [2/3] Checking FastAPI OTP Microservice on port 8000...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$t = Test-NetConnection -ComputerName 127.0.0.1 -Port 8000 -InformationLevel Quiet; if (-not $t) { exit 1 }" >nul 2>&1
+powershell -NoProfile -Command "$c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 8000); exit 0 } catch { exit 1 } finally { $c.Dispose() }" >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo       Starting Python OTP Microservice...
     start "GenBank OTP Microservice (Port 8000)" cmd /k "cd /d "%~dp0Auth-Service" && python main.py"
-    ping 127.0.0.1 -n 3 >nul
+    powershell -NoProfile -Command "for ($i=0; $i -lt 10; $i++) { $c = New-Object System.Net.Sockets.TcpClient; try { $c.Connect('127.0.0.1', 8000); exit 0 } catch { Start-Sleep -Seconds 1 } finally { $c.Dispose() } }; exit 1" >nul 2>&1
+    echo       FastAPI Microservice is now ONLINE on port 8000.
 ) else (
     echo       FastAPI Microservice is already ONLINE on port 8000.
 )
