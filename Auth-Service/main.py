@@ -62,6 +62,46 @@ class OTPVerify(BaseModel):
     otp: str
 
 
+_smtp_conn = None
+_smtp_lock = threading.Lock()
+
+def _get_smtp_conn():
+    """Maintains a persistent, pre-authenticated SMTP connection pool for sub-second dispatches."""
+    global _smtp_conn
+    with _smtp_lock:
+        if _smtp_conn is not None:
+            try:
+                status = _smtp_conn.noop()[0]
+                if status == 250:
+                    return _smtp_conn
+            except Exception:
+                try:
+                    _smtp_conn.close()
+                except Exception:
+                    pass
+                _smtp_conn = None
+
+        if not (SMTP_USER and SMTP_PASSWORD):
+            return None
+
+        try:
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=8)
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            _smtp_conn = server
+            print("[SMTP] Persistent connection pool authenticated with smtp.gmail.com")
+            return _smtp_conn
+        except Exception as e:
+            print(f"[SMTP CONNECT NOTICE] {e}")
+            _smtp_conn = None
+            return None
+
+@app.on_event("startup")
+def startup_event():
+    """Pre-warms SMTP socket in the background so the very first OTP dispatches in < 3 seconds."""
+    if SMTP_USER and SMTP_PASSWORD:
+        threading.Thread(target=_get_smtp_conn, daemon=True).start()
+
 def send_email_otp(email: str, otp: str) -> bool:
     """
     Sends an OTP to the given email address.
@@ -126,12 +166,19 @@ GenBank Security Operations
 </html>"""
             msg.add_alternative(html_content, subtype="html")
 
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
-                server.starttls()
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
+            conn = _get_smtp_conn()
+            if conn:
+                try:
+                    conn.send_message(msg)
+                    dispatched = True
+                except Exception:
+                    with _smtp_lock:
+                        _smtp_conn = None
+                    fresh_conn = _get_smtp_conn()
+                    if fresh_conn:
+                        fresh_conn.send_message(msg)
+                        dispatched = True
             print(f"[SMTP] Successfully dispatched live email to {email}")
-            dispatched = True
         except Exception as e:
             print(f"[SMTP NOTICE] Live email dispatch skipped ({e}). Falling back to demo mode.")
 

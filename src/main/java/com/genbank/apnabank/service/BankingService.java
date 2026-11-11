@@ -138,15 +138,8 @@ public class BankingService {
         String cleanEmail = email.trim();
         String cleanPassword = password.trim();
 
+        // Admin authentication is strictly restricted to authorized official administrator email
         Optional<Admin> adminOpt = adminRepository.findByEmailIgnoreCase(cleanEmail);
-        if (adminOpt.isEmpty()) {
-            adminOpt = adminRepository.findByUsernameIgnoreCase(cleanEmail);
-        }
-        if (adminOpt.isEmpty()) {
-            adminOpt = adminRepository.findAll().stream()
-                    .filter(a -> cleanEmail.equalsIgnoreCase(a.getEmail()) || cleanEmail.equalsIgnoreCase(a.getUsername()))
-                    .findFirst();
-        }
 
         if (adminOpt.isPresent()) {
             Admin admin = adminOpt.get();
